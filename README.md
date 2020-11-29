@@ -15,6 +15,7 @@ Current libraries:
 Not even sure why I made an ANSI escape code library, it's hardly on-topic, I guess the existing ones just felt overkill for my needs.
 
 Image so far:
+
 ![Image so far](syzygy/out.png)
 
 ## // TODO
