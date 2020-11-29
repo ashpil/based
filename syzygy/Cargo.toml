@@ -1,0 +1,16 @@
+[package]
+name = "syzygy"
+version = "0.1.0"
+authors = ["ashpil <shpilenok2001@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+glitz = { path = "../glitz" }
+xenon = { path = "../xenon" }
+antsy = { path = "../antsy" }
+png = "0.16.7"
+rand = "0.7.3"
+rand_chacha = "0.2.2"
+
