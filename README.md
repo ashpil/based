@@ -21,7 +21,6 @@ Image so far:
 ## // TODO
 - Finish implementing _Ray Tracing in One Weekend_ book features
 - Implement features from PBRT
-- Make progress bar prettier (*VERY* important, this one first)
 - Write more documentation comments
 - Write more unit tests
 

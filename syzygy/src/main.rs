@@ -9,9 +9,8 @@ use syzygy::material::{Metal, Lambertian, Dielectric};
 use glitz::vec::Vec3;
 use rand_chacha::ChaChaRng;
 use rand::{SeedableRng, Rng};
-use std::time::Instant;
 use std::rc::Rc;
-use antsy::Printer;
+use antsy::LoadingBar;
 
 fn ray_color(r: Ray, to_hit: &impl Hittable, depth: u16) -> Color {
     if depth <= 0 {
@@ -57,12 +56,11 @@ fn main() {
     // File
     let file = File::create("out.png").unwrap();
     let mut rng = ChaChaRng::seed_from_u64(1);
-    let now = Instant::now();
-    let mut printer = Printer::new();
+    let mut loadingbar = LoadingBar::new(image_height as u16);
 
     fn_to_png(image_width, image_height, file, |i, j| {
         let mut color = Color::new(0.0, 0.0, 0.0);
-        printer.progress_bar((image_height - j) as f64 / image_height as f64);
+        loadingbar.update((image_height - j) as u16);
         for _ in 0..=NUM_SAMPLES {
             let u = (i as f64 + rng.gen::<f64>()) / (image_width - 1) as f64;
             let v = (j as f64 + rng.gen::<f64>()) / (image_height - 1) as f64;
@@ -71,6 +69,6 @@ fn main() {
         }
         color / NUM_SAMPLES as f64
     });
-    println!("Rendering took {} seconds", now.elapsed().as_secs_f64());
+    loadingbar.finish();
 }
 
