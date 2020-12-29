@@ -51,7 +51,7 @@ fn main() {
     world.add(Box::new(Sphere::new(Vec3::new(1.0, 0.0, -1.0), 0.5, mat_right)));
 
     // Camera
-    let cam = SimpleCamera::new();
+    let cam = SimpleCamera::new(Vec3::new(-2.0, 2.0, 1.0), Vec3::new(0.0, 0.0, -1.0), Vec3::new(0.0, 1.0, 0.0), 20.0, aspect_ratio);
     
     // File
     let file = File::create("out.png").unwrap();

@@ -13,31 +13,34 @@ pub struct SimpleCamera {
 }
 
 impl SimpleCamera {
-    pub fn new() -> SimpleCamera {
-        let aspect_ratio = 16.0 / 9.0;
-        let viewport_height = 2.0;
+    pub fn new(lookfrom: Vec3, lookat: Vec3, vup: Vec3, vfov: f64, aspect_ratio: f64) -> SimpleCamera {
+        let theta = vfov.to_radians();
+        let h = (theta / 2.0).tan();
+        let viewport_height = 2.0 * h;
         let viewport_width = aspect_ratio * viewport_height;
-        let focal_length = 1.0;
 
-        let origin = Vec3::new(0.0, 0.0, 0.0);
-        let horizontal = Vec3::new(viewport_width, 0.0, 0.0);
-        let vertical = Vec3::new(0.0, viewport_height, 0.0);
-        let lower_left = origin - (horizontal / 2.0) - (vertical / 2.0) - Vec3::new(0.0, 0.0, focal_length);
+        let w = (lookfrom - lookat).unit_vec();
+        let u = vup.cross(&w).unit_vec();
+        let v = w.cross(&u);
+
+        let horizontal = viewport_width * u;
+        let vertical = viewport_height * v;
+        let origin = lookfrom;
 
         SimpleCamera {
             origin,
             horizontal,
             vertical,
-            lower_left,
+            lower_left: origin - horizontal / 2.0 - vertical / 2.0 - w,
         }
     }
 }
 
 impl Camera for SimpleCamera {
-    fn generate_ray(&self, u: f64, v: f64) -> Ray {
+    fn generate_ray(&self, s: f64, t: f64) -> Ray {
         Ray::new(
             self.origin,
-            self.lower_left + u * self.horizontal + v * self.vertical - self.origin,
+            self.lower_left + s * self.horizontal + t * self.vertical - self.origin,
         )
     }
 }
