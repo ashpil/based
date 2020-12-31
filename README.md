@@ -1,8 +1,8 @@
 # Syzygy
 
-Basic ray tracer written in Rust. So far, I've been following [_Ray Tracing in One Weekend_](https://raytracing.github.io/books/RayTracingInOneWeekend.html). Once I am done with that, I intend to implement features form [PBRT](https://pbrt.org/).
+Basic ray tracer written in Rust. So far, I've fully implemented the features from [_Ray Tracing in One Weekend_](https://raytracing.github.io/books/RayTracingInOneWeekend.html). Currently I am working on optimizing and implementing features from [PBRT](https://pbrt.org/).
 
-Although probably not nearly as efficient as using existing libraries, I am interested in doing this all from scratch. So I'm writing all of my libraries as well, except for complicated things such as randomness and PNG encoding.
+Although probably not nearly as efficient as using existing libraries, I am interested in doing this all from scratch. So I'm writing all of my libraries as well, except for complicated things/things I am uninterested in such as randomness or PNG encoding.
 
 Current libraries:
 ```
@@ -19,7 +19,6 @@ Image so far:
 ![Image so far](syzygy/out.png)
 
 ## // TODO
-- Finish implementing _Ray Tracing in One Weekend_ book features
 - Implement features from PBRT
 - Write more documentation comments
 - Write more unit tests
