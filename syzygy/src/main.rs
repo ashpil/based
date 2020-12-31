@@ -32,11 +32,11 @@ fn ray_color(r: Ray, to_hit: &impl Hittable, depth: u16) -> Color {
 
 fn main() {
     // Image
-    const NUM_SAMPLES: u16 = 100;
+    const NUM_SAMPLES: u16 = 500;
     const MAX_DEPTH: u16 = 50;
 
     let aspect_ratio = 16.0 / 9.0;
-    let image_width = 400;
+    let image_width = 1000;
     let image_height = (image_width as f64 / aspect_ratio) as u32;
 
     // World
@@ -48,10 +48,16 @@ fn main() {
     world.add(Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0, mat_ground)));
     world.add(Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, mat_center)));
     world.add(Box::new(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), 0.5, mat_left.clone())));
+    world.add(Box::new(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), -0.45, mat_left.clone())));
     world.add(Box::new(Sphere::new(Vec3::new(1.0, 0.0, -1.0), 0.5, mat_right)));
 
     // Camera
-    let cam = SimpleCamera::new(Vec3::new(-2.0, 2.0, 1.0), Vec3::new(0.0, 0.0, -1.0), Vec3::new(0.0, 1.0, 0.0), 20.0, aspect_ratio);
+    let lookfrom = Vec3::new(3.0, 3.0, 2.0);
+    let lookat = Vec3::new(0.0, 0.0, -1.0);
+    let vup = Vec3::new(0.0, 1.0, 0.0);
+    let dist_to_focus = (lookfrom - lookat).length();
+    let aperture = 0.5;
+    let cam = SimpleCamera::new(lookfrom, lookat, vup, 20.0, aspect_ratio, aperture, dist_to_focus);
     
     // File
     let file = File::create("out.png").unwrap();

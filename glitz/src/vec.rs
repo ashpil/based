@@ -64,6 +64,14 @@ impl Vec3 {
         }
         p
     }
+
+    pub fn random_in_unit_disk<R: Rng + ?Sized>(rng: &mut R) -> Self {
+        let mut p = Vec3::new(rng.gen_range(-1.0, 1.0), rng.gen_range(-1.0, 1.0), 0.0);
+        while p.dot(&p) >= 1.0 {
+            p = Vec3::new(rng.gen_range(-1.0, 1.0), rng.gen_range(-1.0, 1.0), 0.0);
+        }
+        p
+    }
 }
 
 impl Distribution<Vec3> for Standard {

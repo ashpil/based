@@ -1,5 +1,7 @@
 use glitz::vec::Vec3;
 use crate::ray::Ray;
+use rand_chacha::ChaChaRng;
+use rand::SeedableRng;
 
 pub trait Camera {
     fn generate_ray(&self, u: f64, v: f64) -> Ray;
@@ -10,10 +12,14 @@ pub struct SimpleCamera {
     lower_left: Vec3,
     horizontal: Vec3,
     vertical: Vec3,
+    u: Vec3,
+    v: Vec3,
+    w: Vec3,
+    lens_radius: f64,
 }
 
 impl SimpleCamera {
-    pub fn new(lookfrom: Vec3, lookat: Vec3, vup: Vec3, vfov: f64, aspect_ratio: f64) -> SimpleCamera {
+    pub fn new(lookfrom: Vec3, lookat: Vec3, vup: Vec3, vfov: f64, aspect_ratio: f64, aperture: f64, focus_dist: f64) -> SimpleCamera {
         let theta = vfov.to_radians();
         let h = (theta / 2.0).tan();
         let viewport_height = 2.0 * h;
@@ -23,24 +29,31 @@ impl SimpleCamera {
         let u = vup.cross(&w).unit_vec();
         let v = w.cross(&u);
 
-        let horizontal = viewport_width * u;
-        let vertical = viewport_height * v;
         let origin = lookfrom;
+        let horizontal = focus_dist * viewport_width * u;
+        let vertical = focus_dist * viewport_height * v;
 
         SimpleCamera {
             origin,
             horizontal,
             vertical,
-            lower_left: origin - horizontal / 2.0 - vertical / 2.0 - w,
+            u,
+            v,
+            w,
+            lower_left: origin - horizontal / 2.0 - vertical / 2.0 - focus_dist * w,
+            lens_radius: aperture / 2.0,
         }
     }
 }
 
 impl Camera for SimpleCamera {
     fn generate_ray(&self, s: f64, t: f64) -> Ray {
+        let mut rng = ChaChaRng::from_entropy();
+        let rd = self.lens_radius * Vec3::random_in_unit_disk(&mut rng);
+        let offset = self.u * rd.x + self.v * rd.y;
         Ray::new(
-            self.origin,
-            self.lower_left + s * self.horizontal + t * self.vertical - self.origin,
+            offset + self.origin,
+            self.lower_left + s * self.horizontal + t * self.vertical - self.origin - offset,
         )
     }
 }
