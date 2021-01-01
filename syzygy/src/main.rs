@@ -31,11 +31,11 @@ fn ray_color(r: Ray, to_hit: &impl Hittable, depth: u16) -> Color {
 
 fn main() {
     // Image
-    const NUM_SAMPLES: u16 = 500;
+    const NUM_SAMPLES: u16 = 1000;
     const MAX_DEPTH: u16 = 50;
 
     let aspect_ratio = 16.0 / 9.0;
-    let image_width = 1000;
+    let image_width = 2000;
     let image_height = (image_width as f64 / aspect_ratio) as u32;
 
     // World
