@@ -3,7 +3,6 @@ use rand::distributions::Standard;
 use rand::prelude::Distribution;
 use rand::Rng;
 
-
 #[derive(Debug, PartialEq, Clone, Copy, Default)]
 pub struct Vec3 {
     pub x: f64,
@@ -66,9 +65,9 @@ impl Vec3 {
     }
 
     pub fn random_in_unit_disk<R: Rng + ?Sized>(rng: &mut R) -> Self {
-        let mut p = Vec3::new(rng.gen_range(-1.0, 1.0), rng.gen_range(-1.0, 1.0), 0.0);
+        let mut p = Vec3::new(rng.gen_range(-1.0..=1.0), rng.gen_range(-1.0..=1.0), 0.0);
         while p.dot(&p) >= 1.0 {
-            p = Vec3::new(rng.gen_range(-1.0, 1.0), rng.gen_range(-1.0, 1.0), 0.0);
+            p = Vec3::new(rng.gen_range(-1.0..=1.0), rng.gen_range(-1.0..=1.0), 0.0);
         }
         p
     }
@@ -76,7 +75,7 @@ impl Vec3 {
 
 impl Distribution<Vec3> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Vec3 {
-        Vec3::new(rng.gen_range(-1.0, 1.0), rng.gen_range(-1.0, 1.0), rng.gen_range(-1.0, 1.0))
+        Vec3::new(rng.gen_range(-1.0..=1.0), rng.gen_range(-1.0..=1.0), rng.gen_range(-1.0..=1.0))
     }
 }
 

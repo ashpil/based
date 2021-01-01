@@ -11,6 +11,6 @@ glitz = { path = "../glitz" }
 xenon = { path = "../xenon" }
 antsy = { path = "../antsy" }
 png = "0.16.7"
-rand = "0.7.3"
-rand_chacha = "0.2.2"
+rand_xoshiro = "0.6.0"
+rand = { version = "0.8", features = ["small_rng"] }
 

@@ -7,7 +7,7 @@ use syzygy::camera::Camera;
 use syzygy::hittable::{Hittables, Sphere, Hittable};
 use syzygy::material::{Metal, Lambertian, Dielectric};
 use glitz::vec::Vec3;
-use rand_chacha::ChaChaRng;
+use rand_xoshiro::Xoshiro256Plus;
 use rand::{SeedableRng, Rng};
 use std::rc::Rc;
 use antsy::LoadingBar;
@@ -32,11 +32,11 @@ fn ray_color(r: Ray, to_hit: &impl Hittable, depth: u16) -> Color {
 
 fn main() {
     // Image
-    const NUM_SAMPLES: u16 = 500;
+    const NUM_SAMPLES: u16 = 100;
     const MAX_DEPTH: u16 = 50;
 
     let aspect_ratio = 16.0 / 9.0;
-    let image_width = 1000;
+    let image_width = 400;
     let image_height = (image_width as f64 / aspect_ratio) as u32;
 
     // World
@@ -61,7 +61,7 @@ fn main() {
     
     // File
     let file = File::create("out.png").unwrap();
-    let mut rng = ChaChaRng::seed_from_u64(1);
+    let mut rng = Xoshiro256Plus::seed_from_u64(1);
     let mut loadingbar = LoadingBar::new(image_height as u16);
 
     fn_to_png(image_width, image_height, file, |i, j| {
@@ -70,7 +70,7 @@ fn main() {
         for _ in 0..=NUM_SAMPLES {
             let u = (i as f64 + rng.gen::<f64>()) / (image_width - 1) as f64;
             let v = (j as f64 + rng.gen::<f64>()) / (image_height - 1) as f64;
-            let r = cam.generate_ray(u, v);
+            let r = cam.make_ray(u, v, &mut rng);
             color += ray_color(r, &world, MAX_DEPTH);
         }
         color / NUM_SAMPLES as f64
