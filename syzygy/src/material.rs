@@ -1,9 +1,7 @@
 use glitz::vec::Vec3;
 use crate::hittable::Hit;
-use rand_xoshiro::Xoshiro256Plus;
-use rand::SeedableRng;
-use rand::Rng;
 use crate::ray::Ray;
+use crate::random::with_rng;
 use xenon::color::Color;
 
 pub trait Material {
@@ -16,8 +14,7 @@ pub struct Lambertian {
 
 impl Material for Lambertian {
     fn scatter(&self, hit: &Hit, _ri: Ray) -> Option<(Ray, Color)> {
-        let mut rng = Xoshiro256Plus::from_entropy();
-        let mut scatter_direction = hit.normal + Vec3::random_unit_vec(&mut rng);
+        let mut scatter_direction = hit.normal + with_rng(Vec3::random_unit_vec);
         if scatter_direction.near_zero() {
             scatter_direction = hit.normal;
         }
@@ -46,8 +43,7 @@ impl Metal {
 impl Material for Metal {
     fn scatter(&self, hit: &Hit, ri: Ray) -> Option<(Ray, Color)> {
         let reflected = ri.d.unit_vec().reflect(&hit.normal);
-        let mut rng = Xoshiro256Plus::from_entropy();
-        let scattered = Ray::new(hit.point, reflected + self.fuzz * Vec3::random_in_unit_sphere(&mut rng));
+        let scattered = Ray::new(hit.point, reflected + self.fuzz * with_rng(Vec3::random_in_unit_sphere));
         if scattered.d.dot(&hit.normal) > 0.0 {
             Some((scattered, self.albedo))
         } else {
@@ -81,10 +77,7 @@ impl Material for Dielectric {
         let cos_theta = (-unit_direction).dot(&hit.normal).min(1.0);
         let sin_theta = (1.0 - cos_theta * cos_theta).sqrt();
 
-        let mut rng = Xoshiro256Plus::from_entropy();
-
-
-        Some(if refraction_ratio * sin_theta > 1.0 || Self::reflectance(cos_theta, refraction_ratio) > rng.gen() {
+        Some(if refraction_ratio * sin_theta > 1.0 || Self::reflectance(cos_theta, refraction_ratio) > with_rng(rand::Rng::gen) {
             (Ray::new(hit.point, unit_direction.reflect(&hit.normal)), Color::BLACK)
         } else {
             (Ray::new(hit.point, unit_direction.refract(&hit.normal, refraction_ratio)), Color::BLACK)

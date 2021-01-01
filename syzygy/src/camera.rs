@@ -1,9 +1,9 @@
 use glitz::vec::Vec3;
 use crate::ray::Ray;
-use rand::Rng;
+use crate::random::with_rng;
 
 pub trait Camera {
-    fn make_ray(&self, u: f64, v: f64, rng: &mut impl Rng) -> Ray;
+    fn make_ray(&self, u: f64, v: f64) -> Ray;
 }
 
 pub struct SimpleCamera {
@@ -44,8 +44,8 @@ impl SimpleCamera {
 }
 
 impl Camera for SimpleCamera {
-    fn make_ray(&self, s: f64, t: f64, rng: &mut impl Rng) -> Ray {
-        let rd = self.lens_radius * Vec3::random_in_unit_disk(rng);
+    fn make_ray(&self, s: f64, t: f64) -> Ray {
+        let rd = self.lens_radius * with_rng(Vec3::random_in_unit_disk);
         let offset = self.u * rd.x + self.v * rd.y;
         Ray::new(
             offset + self.origin,

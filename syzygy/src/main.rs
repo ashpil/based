@@ -1,14 +1,13 @@
 use std::fs::File;
 use xenon::color::Color;
 use xenon::write::fn_to_png;
+use syzygy::random::with_rng;
 use syzygy::ray::Ray;
 use syzygy::camera::SimpleCamera;
 use syzygy::camera::Camera;
 use syzygy::hittable::{Hittables, Sphere, Hittable};
 use syzygy::material::{Metal, Lambertian, Dielectric};
 use glitz::vec::Vec3;
-use rand_xoshiro::Xoshiro256Plus;
-use rand::{SeedableRng, Rng};
 use std::rc::Rc;
 use antsy::LoadingBar;
 
@@ -61,16 +60,15 @@ fn main() {
     
     // File
     let file = File::create("out.png").unwrap();
-    let mut rng = Xoshiro256Plus::seed_from_u64(1);
     let mut loadingbar = LoadingBar::new(image_height as u16);
 
     fn_to_png(image_width, image_height, file, |i, j| {
         let mut color = Color::new(0.0, 0.0, 0.0);
         loadingbar.update((image_height - j) as u16);
         for _ in 0..=NUM_SAMPLES {
-            let u = (i as f64 + rng.gen::<f64>()) / (image_width - 1) as f64;
-            let v = (j as f64 + rng.gen::<f64>()) / (image_height - 1) as f64;
-            let r = cam.make_ray(u, v, &mut rng);
+            let u = (i as f64 + with_rng(rand::Rng::gen::<f64>)) / (image_width - 1) as f64;
+            let v = (j as f64 + with_rng(rand::Rng::gen::<f64>)) / (image_height - 1) as f64;
+            let r = cam.make_ray(u, v);
             color += ray_color(r, &world, MAX_DEPTH);
         }
         color / NUM_SAMPLES as f64
