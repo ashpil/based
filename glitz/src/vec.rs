@@ -52,11 +52,11 @@ impl Vec3 {
         (self.x.abs() < e) && (self.y.abs() < e) && (self.z.abs() < e)
     }
 
-    pub fn random_unit_vec<R: Rng + ?Sized>(rng: &mut R) -> Self {
+    pub fn random_unit_vec(rng: &mut impl Rng) -> Self {
         Self::random_in_unit_sphere(rng).unit_vec()
     }
 
-    pub fn random_in_unit_sphere<R: Rng + ?Sized>(rng: &mut R) -> Self {
+    pub fn random_in_unit_sphere(rng: &mut impl Rng) -> Self {
         let mut p: Vec3 = rng.gen();
         while p.dot(&p) >= 1.0 {
             p = rng.gen();
@@ -64,7 +64,7 @@ impl Vec3 {
         p
     }
 
-    pub fn random_in_unit_disk<R: Rng + ?Sized>(rng: &mut R) -> Self {
+    pub fn random_in_unit_disk(rng: &mut impl Rng) -> Self {
         let mut p = Vec3::new(rng.gen_range(-1.0..=1.0), rng.gen_range(-1.0..=1.0), 0.0);
         while p.dot(&p) >= 1.0 {
             p = Vec3::new(rng.gen_range(-1.0..=1.0), rng.gen_range(-1.0..=1.0), 0.0);

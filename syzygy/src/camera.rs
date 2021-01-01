@@ -3,7 +3,7 @@ use crate::ray::Ray;
 use rand::Rng;
 
 pub trait Camera {
-    fn make_ray<R: Rng + ?Sized>(&self, u: f64, v: f64, rng: &mut R) -> Ray;
+    fn make_ray(&self, u: f64, v: f64, rng: &mut impl Rng) -> Ray;
 }
 
 pub struct SimpleCamera {
@@ -44,7 +44,7 @@ impl SimpleCamera {
 }
 
 impl Camera for SimpleCamera {
-    fn make_ray<R: Rng + ?Sized>(&self, s: f64, t: f64, rng: &mut R) -> Ray {
+    fn make_ray(&self, s: f64, t: f64, rng: &mut impl Rng) -> Ray {
         let rd = self.lens_radius * Vec3::random_in_unit_disk(rng);
         let offset = self.u * rd.x + self.v * rd.y;
         Ray::new(

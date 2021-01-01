@@ -58,16 +58,18 @@ impl Hittable for Sphere {
             let sqrtd = discriminant.sqrt();
 
             // Find the nearest root that lies in the acceptable range.
-            let roots = [(-half_b - sqrtd) / a, (-half_b + sqrtd) / a];
-            if let Some(root) = roots.iter().find(|x| (tmin..tmax).contains(&x)) {
-                let point = r.at(*root);
-                let outward_normal = (point - self.center) / self.radius;
-                let front_face = r.d.dot(&outward_normal) < 0.0;
-                let normal = if front_face { outward_normal } else { -outward_normal };
-                Some(Hit::new(point, normal, *root, front_face, Rc::clone(&self.mat)))
-            } else {
-                None
+            let mut root = (-half_b - sqrtd) / a;
+            if !(tmin..tmax).contains(&root) {
+                root = (-half_b + sqrtd) / a;
+                if !(tmin..tmax).contains(&root) {
+                    return None;
+                }
             }
+            let point = r.at(root);
+            let outward_normal = (point - self.center) / self.radius;
+            let front_face = r.d.dot(&outward_normal) < 0.0;
+            let normal = if front_face { outward_normal } else { -outward_normal };
+            Some(Hit::new(point, normal, root, front_face, Rc::clone(&self.mat)))
         }
     }
 }
