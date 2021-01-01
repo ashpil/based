@@ -12,5 +12,5 @@ xenon = { path = "../xenon" }
 antsy = { path = "../antsy" }
 png = "0.16.7"
 rand_xoshiro = "0.6.0"
-rand = { version = "0.8", features = ["small_rng"] }
+rand = "0.8"
 

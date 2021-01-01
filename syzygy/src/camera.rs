@@ -1,6 +1,8 @@
 use glitz::vec::Vec3;
 use crate::ray::Ray;
 use crate::random::with_rng;
+use rand::distributions::Uniform;
+use rand::Rng;
 
 pub trait Camera {
     fn make_ray(&self, u: f64, v: f64) -> Ray;
@@ -45,8 +47,15 @@ impl SimpleCamera {
 
 impl Camera for SimpleCamera {
     fn make_ray(&self, s: f64, t: f64) -> Ray {
-        let rd = self.lens_radius * with_rng(Vec3::random_in_unit_disk);
-        let offset = self.u * rd.x + self.v * rd.y;
+
+        let range = Uniform::new_inclusive(-1.0, 1.0);
+        let mut rd = [with_rng(|r| Rng::sample(r, range)), with_rng(|r| Rng::sample(r, range))];
+        while rd[0] * rd[0] + rd[1] * rd[1] >= 1.0 {
+            rd = [with_rng(|r| Rng::sample(r, range)), with_rng(|r| Rng::sample(r, range))];
+        }
+
+        let offset = (self.u * rd[0] + self.v * rd[1]) * self.lens_radius;
+
         Ray::new(
             offset + self.origin,
             self.lower_left + s * self.horizontal + t * self.vertical - self.origin - offset,

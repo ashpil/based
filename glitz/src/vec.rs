@@ -1,7 +1,9 @@
 use std::ops::{Sub, Add, Div, Mul, Neg};
 use rand::distributions::Standard;
+use rand::distributions::Uniform;
 use rand::prelude::Distribution;
 use rand::Rng;
+use rand_distr::StandardNormal;
 
 #[derive(Debug, PartialEq, Clone, Copy, Default)]
 pub struct Vec3 {
@@ -46,14 +48,14 @@ impl Vec3 {
         r_out_perp + r_out_parallel
     }
 
+    // Return true if the vector is close to zero in all dimensions.
     pub fn near_zero(&self) -> bool {
-        // Return true if the vector is close to zero in all dimensions.
         let e = 1e-8;
         (self.x.abs() < e) && (self.y.abs() < e) && (self.z.abs() < e)
     }
 
     pub fn random_unit_vec(rng: &mut impl Rng) -> Self {
-        Self::random_in_unit_sphere(rng).unit_vec()
+        Vec3::new(rng.sample(StandardNormal), rng.sample(StandardNormal), rng.sample(StandardNormal)).unit_vec()
     }
 
     pub fn random_in_unit_sphere(rng: &mut impl Rng) -> Self {
@@ -63,19 +65,12 @@ impl Vec3 {
         }
         p
     }
-
-    pub fn random_in_unit_disk(rng: &mut impl Rng) -> Self {
-        let mut p = Vec3::new(rng.gen_range(-1.0..=1.0), rng.gen_range(-1.0..=1.0), 0.0);
-        while p.dot(&p) >= 1.0 {
-            p = Vec3::new(rng.gen_range(-1.0..=1.0), rng.gen_range(-1.0..=1.0), 0.0);
-        }
-        p
-    }
 }
 
 impl Distribution<Vec3> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Vec3 {
-        Vec3::new(rng.gen_range(-1.0..=1.0), rng.gen_range(-1.0..=1.0), rng.gen_range(-1.0..=1.0))
+        let between = Uniform::new_inclusive(-1.0, 1.0);
+        Vec3::new(between.sample(rng), between.sample(rng), between.sample(rng)) 
     }
 }
 
