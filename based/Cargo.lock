@@ -142,7 +142,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "syzygy"
+name = "based"
 version = "0.1.0"
 dependencies = [
  "glitz",

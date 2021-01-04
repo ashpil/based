@@ -1,9 +1,9 @@
-use syzygy::renderer::Renderer;
-use syzygy::camera::SimpleCamera;
+use based::renderer::Renderer;
+use based::camera::SimpleCamera;
+use based::material::{Metal, Dielectric, Lambertian};
+use based::hittable::{Sphere, Hittables};
 use glitz::vec::Vec3;
-use syzygy::hittable::{Sphere, Hittables};
 use xenon::color::Color;
-use syzygy::material::{Metal, Dielectric, Lambertian};
 
 fn main() {
     let aspect_ratio = 16.0 / 9.0;
