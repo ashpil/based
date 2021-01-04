@@ -79,25 +79,3 @@ fn make_color(s: String, color: u8) -> String {
     format!("{}{}m{}{}", ESC, color, s, RESET) 
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::thread;
-
-    // Just a visual test for now, so I can confirm it works
-    #[test]
-    fn bar() {
-        let mut b = LoadingBar::new(300);
-        b.update(10);
-        b.flush();
-        let second = Duration::from_secs(1);
-        thread::sleep(second);
-        b.update(20);
-        b.flush();
-        thread::sleep(second);
-        b.update(30);
-        b.flush();
-        thread::sleep(second);
-        b.finish();
-    }
-}

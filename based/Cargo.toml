@@ -10,7 +10,7 @@ edition = "2018"
 glitz = { path = "../glitz" }
 xenon = { path = "../xenon" }
 antsy = { path = "../antsy" }
-png = "0.16.7"
+png = { version = "0.16.7", default-features = false }
 rand_xoshiro = "0.6.0"
-rand = "0.8"
+rand = { version = "0.8.0", default-features = false }
 
