@@ -39,11 +39,11 @@ impl<W: Hittable, C: Camera> Renderer<W, C> {
     pub fn render_to_file(self, filename: &str) {
         let file = File::create(filename).unwrap();
         let image_height = (self.image_width as f32 / self.aspect_ratio) as u32;
-        let mut loadingbar = LoadingBar::new(image_height as u16);
+        let mut loadingbar = LoadingBar::new(image_height as u16).unwrap();
 
         fn_to_png(self.image_width, image_height, file, |i, j| {
             let mut color = Color::new(0.0, 0.0, 0.0);
-            loadingbar.update((image_height - j) as u16);
+            loadingbar.update((image_height - j) as u16).unwrap();
             for _ in 0..=self.num_samples {
                 let u = (i as f32 + with_rng(rand::Rng::gen::<f32>)) / (self.image_width - 1) as f32;
                 let v = (j as f32 + with_rng(rand::Rng::gen::<f32>)) / (image_height - 1) as f32;
@@ -52,7 +52,7 @@ impl<W: Hittable, C: Camera> Renderer<W, C> {
             }
             color / self.num_samples as f32
         });
-        loadingbar.finish();
+        loadingbar.finish().unwrap();
     }
 }
 

@@ -1,6 +1,4 @@
-use std::io::stdout;
-use std::io::Stdout;
-use std::io::Write;
+use std::io::{Stdout, Write, self};
 use std::process::Command;
 use std::time::{Instant, Duration};
 
@@ -16,54 +14,51 @@ pub struct LoadingBar {
 }
 
 impl LoadingBar {
-    pub fn new(max: u16) -> LoadingBar {
-        let mut stdout = stdout();
-        stdout.write_all(b"\n").unwrap();
-        stdout.write_all((String::from(ESC) + "s").as_bytes()).unwrap();
-        stdout.write_all(b"\n").unwrap();
+    pub fn new(max: u16) -> Result<LoadingBar, io::Error> {
+        let std = io::stdout();
+        let mut handle = std.lock();
+        writeln!(handle,)?;
+        writeln!(handle, "{}", (String::from(ESC) + "s"))?;
         let width =  String::from_utf8_lossy(&Command::new("tput").arg("cols").output().unwrap().stdout).trim().parse::<u16>().unwrap();
         let start_time = Instant::now();
-        LoadingBar {
-            stdout,
+        Ok(LoadingBar {
+            stdout: io::stdout(),
             width,
             start_time,
             max,
-        }
+        })
     }
 
     // Updates time, bar, and count
-    pub fn update(&mut self, num_done: u16) {
-        self.stdout.write_all((String::from(ESC) + "u").as_bytes()).unwrap();
-        self.stdout.write_all((String::from(ESC) + "1A").as_bytes()).unwrap();
-        let done = format!("{:>1$}", num_done, self.max.to_string().len());
-        let count = format!(" {}/{} ", done, self.max);
+    pub fn update(&mut self, num_done: u16) -> io::Result<()> {
+        let mut handle = self.stdout.lock();
+        write!(handle, "{}u", ESC)?;
+        write!(handle, "{}1A", ESC)?;
         let time = format_duration(self.start_time.elapsed());
-        self.stdout.write_all(time.as_bytes()).unwrap();
-        self.stdout.write_all(b"[").unwrap();
+        write!(handle, "{}", time)?;
+        let done = format!("{:>1$}", num_done, ((self.max as f32).log10() + 1.0).floor() as usize);
+        let count = format!(" {}/{} ", done, self.max);
         let reserved_len = (count.len() + time.len()) as u16 + 2;
         let percent_done = num_done as f32 / self.max as f32;
         let num_done = ((self.width - reserved_len) as f32 * percent_done).round() as usize;
         let num_todo = ((self.width - reserved_len) as f32 * (1.0 - percent_done)).round() as usize;
-        let bar = format!("{}{}",
+        write!(handle, "[{}{}]", 
                           make_color(" ".repeat(num_done), 104),
-                          make_color(" ".repeat(num_todo), 107));
-        self.stdout.write_all(bar.as_bytes()).unwrap();
-        self.stdout.write_all(b"]").unwrap();
-        self.stdout.write_all(count.as_bytes()).unwrap();
-        self.stdout.write_all(b"\n").unwrap();
+                          make_color(" ".repeat(num_todo), 107))?;
+        writeln!(handle, "{}", count)
     }
 
-    pub fn flush(&mut self) {
-        self.stdout.flush().unwrap();
+    pub fn flush(&mut self) -> io::Result<()> {
+        self.stdout.flush()
     }
 
     // Finishes bar; writes total time taken
-    pub fn finish(&mut self) {
+    pub fn finish(&mut self) -> io::Result<()> {
+        self.update(self.max)?;
         let time_str = format!("Took {} seconds", self.start_time.elapsed().as_secs_f32());
         let finish_str = format!("{:^1$}", time_str, self.width as usize);
-        self.update(self.max);
-        self.stdout.write_all(finish_str.as_bytes()).unwrap();
-        self.stdout.write_all(b"\n").unwrap();
+        let mut handle = self.stdout.lock();
+        writeln!(handle, "{}", finish_str)
     }
 }
 
