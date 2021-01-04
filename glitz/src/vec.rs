@@ -7,24 +7,24 @@ use rand_distr::StandardNormal;
 
 #[derive(Debug, PartialEq, Clone, Copy, Default)]
 pub struct Vec3 {
-    pub x: f64,
-    pub y: f64,
-    pub z: f64,
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
 }
 
 impl Vec3 {
     #[inline]
-    pub fn new(x: f64, y: f64, z: f64) -> Self {
+    pub fn new(x: f32, y: f32, z: f32) -> Self {
         Self { x, y, z }
     }
 
     #[inline]
-    pub fn dot(&self, other: &Self) -> f64 {
+    pub fn dot(&self, other: &Self) -> f32 {
         self.x * other.x + self.y * other.y + self.z * other.z
     }
 
     #[inline]
-    pub fn length(&self) -> f64 {
+    pub fn length(&self) -> f32 {
         (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
     }
 
@@ -48,7 +48,7 @@ impl Vec3 {
     }
 
     #[inline]
-    pub fn refract(&self, n: &Vec3, etai_over_etat: f64) -> Vec3 {
+    pub fn refract(&self, n: &Vec3, etai_over_etat: f32) -> Vec3 {
         let cos_theta = ((-*self).dot(&n)).min(1.0);
         let r_out_perp = etai_over_etat * (*self + cos_theta * *n);
         let r_out_parallel = -((1.0 - r_out_perp.dot(&r_out_perp)).abs().sqrt()) * *n;
@@ -123,11 +123,11 @@ impl Neg for Vec3 {
     }
 }
 
-impl Mul<f64> for Vec3 {
+impl Mul<f32> for Vec3 {
     type Output = Vec3;
 
     #[inline]
-    fn mul(self, s: f64) -> Self::Output {
+    fn mul(self, s: f32) -> Self::Output {
         Vec3 {
             x: self.x * s,
             y: self.y * s,
@@ -136,7 +136,7 @@ impl Mul<f64> for Vec3 {
     }
 }
 
-impl Mul<Vec3> for f64 {
+impl Mul<Vec3> for f32 {
     type Output = Vec3;
 
     #[inline]
@@ -149,11 +149,11 @@ impl Mul<Vec3> for f64 {
     }
 }
 
-impl Div<f64> for Vec3 {
+impl Div<f32> for Vec3 {
     type Output = Vec3;
 
     #[inline]
-    fn div(self, s: f64) -> Self::Output {
+    fn div(self, s: f32) -> Self::Output {
         Vec3 {
             x: self.x / s,
             y: self.y / s,
@@ -162,8 +162,8 @@ impl Div<f64> for Vec3 {
     }
 }
 
-impl From<[f64; 3]> for Vec3 {
-    fn from(arr: [f64; 3]) -> Self {
+impl From<[f32; 3]> for Vec3 {
+    fn from(arr: [f32; 3]) -> Self {
         Vec3 {
             x: arr[0],
             y: arr[1],
@@ -220,7 +220,7 @@ mod vec3_tests {
     fn test_length() {
         let vec1 = Vec3::new(0.0, 1.0, 2.0);
         let vec2 = Vec3::new(2.0, 1.0, 0.0);
-        let root5 = 5.0_f64.sqrt();
+        let root5 = 5.0_f32.sqrt();
         assert_eq!(vec1.length(), root5);
         assert_eq!(vec2.length(), root5);
     }
@@ -229,7 +229,7 @@ mod vec3_tests {
     fn test_unit_vec() {
         let vec1 = Vec3::new(0.0, 1.0, 2.0);
         let vec2 = Vec3::new(2.0, 1.0, 0.0);
-        let root5 = 5.0_f64.sqrt();
+        let root5 = 5.0_f32.sqrt();
         let norm1 = Vec3::new(0.0, 1.0/root5, 2.0/root5);
         let norm2 = Vec3::new(2.0/root5, 1.0/root5, 0.0);
         assert_eq!(vec1.unit_vec(), norm1);

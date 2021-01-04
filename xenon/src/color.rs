@@ -2,9 +2,9 @@ use std::ops::{Add, AddAssign, Mul, Sub, Div};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Color {
-    pub r: f64,
-    pub g: f64,
-    pub b: f64,
+    pub r: f32,
+    pub g: f32,
+    pub b: f32,
 }
 
 
@@ -12,7 +12,7 @@ impl Color {
     pub const BLACK: Color = Color { r: 1.0, g: 1.0, b: 1.0 };
     pub const WHITE: Color = Color { r: 0.0, g: 0.0, b: 0.0 };
 
-    pub fn new(r: f64, g: f64, b: f64) -> Self {
+    pub fn new(r: f32, g: f32, b: f32) -> Self {
         Color { r, g, b }
     }
 
@@ -21,7 +21,7 @@ impl Color {
     }
 
     pub fn write_16_sampled(self, buffer: &mut [u8], num_samples: u16) {
-        let write_color = self / num_samples as f64;
+        let write_color = self / num_samples as f32;
         let red = (write_color.r.sqrt().clamp(0.0, 0.999) * 65535.0) as u16;
         let green = (write_color.g.sqrt().clamp(0.0, 0.999) * 65535.0) as u16;
         let blue = (write_color.b.sqrt().clamp(0.0, 0.999) * 65535.0) as u16;
@@ -66,10 +66,10 @@ impl AddAssign for Color {
     }
 }
 
-impl Mul<f64> for Color {
+impl Mul<f32> for Color {
     type Output = Color;
 
-    fn mul(self, s: f64) -> Self::Output {
+    fn mul(self, s: f32) -> Self::Output {
         Color {
             r: self.r * s,
             g: self.g * s,
@@ -90,7 +90,7 @@ impl Mul<Color> for Color {
     }
 }
 
-impl Mul<Color> for f64 {
+impl Mul<Color> for f32 {
     type Output = Color;
 
     fn mul(self, col: Color) -> Self::Output {
@@ -102,10 +102,10 @@ impl Mul<Color> for f64 {
     }
 }
 
-impl Div<f64> for Color {
+impl Div<f32> for Color {
     type Output = Color;
 
-    fn div(self, s: f64) -> Self::Output {
+    fn div(self, s: f32) -> Self::Output {
         Color {
             r: self.r / s,
             g: self.g / s,

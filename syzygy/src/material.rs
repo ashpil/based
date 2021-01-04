@@ -33,11 +33,11 @@ impl Lambertian {
 #[derive(Clone)]
 pub struct Metal {
     albedo: Color,
-    fuzz: f64,
+    fuzz: f32,
 }
 
 impl Metal {
-    pub fn new(albedo: Color, fuzz: f64) -> Metal {
+    pub fn new(albedo: Color, fuzz: f32) -> Metal {
         Metal { albedo, fuzz }
     }
 }
@@ -56,15 +56,15 @@ impl Material for Metal {
 
 #[derive(Clone)]
 pub struct Dielectric {
-    ir: f64,
+    ir: f32,
 }
 
 impl Dielectric {
-    pub fn new(ir: f64) -> Dielectric {
+    pub fn new(ir: f32) -> Dielectric {
         Dielectric { ir }
     }
 
-    fn reflectance(cosine: f64, ref_idx: f64) -> f64 {
+    fn reflectance(cosine: f32, ref_idx: f32) -> f32 {
         // Use Schlick's approximation for reflectance.
         let r0_temp = (1.0 - ref_idx) / (1.0 + ref_idx);
         let r0 = r0_temp * r0_temp;

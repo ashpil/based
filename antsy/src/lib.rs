@@ -41,9 +41,9 @@ impl LoadingBar {
         self.stdout.write_all(time.as_bytes()).unwrap();
         self.stdout.write_all(b"[").unwrap();
         let reserved_len = (count.len() + time.len()) as u16 + 2;
-        let percent_done = num_done as f64 / self.max as f64;
-        let num_done = ((self.width - reserved_len) as f64 * percent_done).round() as usize;
-        let num_todo = ((self.width - reserved_len) as f64 * (1.0 - percent_done)).round() as usize;
+        let percent_done = num_done as f32 / self.max as f32;
+        let num_done = ((self.width - reserved_len) as f32 * percent_done).round() as usize;
+        let num_todo = ((self.width - reserved_len) as f32 * (1.0 - percent_done)).round() as usize;
         let bar = format!("{}{}",
                           make_color(" ".repeat(num_done), 104),
                           make_color(" ".repeat(num_todo), 107));
@@ -59,7 +59,7 @@ impl LoadingBar {
 
     // Finishes bar; writes total time taken
     pub fn finish(&mut self) {
-        let time_str = format!("Took {} seconds", self.start_time.elapsed().as_secs_f64());
+        let time_str = format!("Took {} seconds", self.start_time.elapsed().as_secs_f32());
         let finish_str = format!("{:^1$}", time_str, self.width as usize);
         self.update(self.max);
         self.stdout.write_all(finish_str.as_bytes()).unwrap();
