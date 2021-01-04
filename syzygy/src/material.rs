@@ -8,6 +8,7 @@ pub trait Material {
     fn scatter(&self, hit: &Hit, ri: Ray) -> Option<(Ray, Color)>;
 }
 
+#[derive(Clone)]
 pub struct Lambertian {
     albedo: Color,
 }
@@ -29,6 +30,7 @@ impl Lambertian {
     }
 }
 
+#[derive(Clone)]
 pub struct Metal {
     albedo: Color,
     fuzz: f64,
@@ -52,6 +54,7 @@ impl Material for Metal {
     }
 }
 
+#[derive(Clone)]
 pub struct Dielectric {
     ir: f64,
 }

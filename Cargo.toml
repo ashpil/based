@@ -7,3 +7,7 @@ members = [
     "syzygy",
 ]
 
+[profile.release]
+debug = 1
+panic = "abort"
+

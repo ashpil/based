@@ -13,22 +13,27 @@ pub struct Vec3 {
 }
 
 impl Vec3 {
-    pub fn dot(&self, other: &Self) -> f64 {
-        self.x * other.x + self.y * other.y + self.z * other.z
-    }
-
-    pub fn length(&self) -> f64 {
-        (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
-    }
-
-    pub fn unit_vec(&self) -> Self {
-        *self / self.length()
-    }
-
+    #[inline]
     pub fn new(x: f64, y: f64, z: f64) -> Self {
         Self { x, y, z }
     }
 
+    #[inline]
+    pub fn dot(&self, other: &Self) -> f64 {
+        self.x * other.x + self.y * other.y + self.z * other.z
+    }
+
+    #[inline]
+    pub fn length(&self) -> f64 {
+        (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
+    }
+
+    #[inline]
+    pub fn unit_vec(&self) -> Self {
+        *self / self.length()
+    }
+
+    #[inline]
     pub fn cross(&self, other: &Self) -> Self {
         Self::new(
             self.y*other.z - self.z*other.y,
@@ -37,10 +42,12 @@ impl Vec3 {
         )
     }
 
+    #[inline]
     pub fn reflect(&self, n: &Self) -> Self {
         *self - 2.0 * self.dot(n) * *n
     }
 
+    #[inline]
     pub fn refract(&self, n: &Vec3, etai_over_etat: f64) -> Vec3 {
         let cos_theta = ((-*self).dot(&n)).min(1.0);
         let r_out_perp = etai_over_etat * (*self + cos_theta * *n);
@@ -49,15 +56,18 @@ impl Vec3 {
     }
 
     // Return true if the vector is close to zero in all dimensions.
+    #[inline]
     pub fn near_zero(&self) -> bool {
         let e = 1e-8;
         (self.x.abs() < e) && (self.y.abs() < e) && (self.z.abs() < e)
     }
 
+    #[inline]
     pub fn random_unit_vec(rng: &mut impl Rng) -> Self {
         Vec3::new(rng.sample(StandardNormal), rng.sample(StandardNormal), rng.sample(StandardNormal)).unit_vec()
     }
 
+    #[inline]
     pub fn random_in_unit_sphere(rng: &mut impl Rng) -> Self {
         let mut p: Vec3 = rng.gen();
         while p.dot(&p) >= 1.0 {
@@ -77,6 +87,7 @@ impl Distribution<Vec3> for Standard {
 impl Add for Vec3 {
     type Output = Vec3;
 
+    #[inline]
     fn add(self, other: Self) -> Self::Output {
         Vec3 {
             x: self.x + other.x,
@@ -89,6 +100,7 @@ impl Add for Vec3 {
 impl Sub for Vec3 {
     type Output = Vec3;
 
+    #[inline]
     fn sub(self, other: Self) -> Self::Output {
         Vec3 {
             x: self.x - other.x,
@@ -101,6 +113,7 @@ impl Sub for Vec3 {
 impl Neg for Vec3 {
     type Output = Vec3;
 
+    #[inline]
     fn neg(self) -> Self::Output {
         Vec3 {
             x: -self.x,
@@ -113,6 +126,7 @@ impl Neg for Vec3 {
 impl Mul<f64> for Vec3 {
     type Output = Vec3;
 
+    #[inline]
     fn mul(self, s: f64) -> Self::Output {
         Vec3 {
             x: self.x * s,
@@ -125,6 +139,7 @@ impl Mul<f64> for Vec3 {
 impl Mul<Vec3> for f64 {
     type Output = Vec3;
 
+    #[inline]
     fn mul(self, vec: Vec3) -> Self::Output {
         Vec3 {
             x: vec.x * self,
@@ -137,6 +152,7 @@ impl Mul<Vec3> for f64 {
 impl Div<f64> for Vec3 {
     type Output = Vec3;
 
+    #[inline]
     fn div(self, s: f64) -> Self::Output {
         Vec3 {
             x: self.x / s,

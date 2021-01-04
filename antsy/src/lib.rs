@@ -18,9 +18,9 @@ pub struct LoadingBar {
 impl LoadingBar {
     pub fn new(max: u16) -> LoadingBar {
         let mut stdout = stdout();
-        stdout.write(b"\n").unwrap();
-        stdout.write((String::from(ESC) + "s").as_bytes()).unwrap();
-        stdout.write(b"\n").unwrap();
+        stdout.write_all(b"\n").unwrap();
+        stdout.write_all((String::from(ESC) + "s").as_bytes()).unwrap();
+        stdout.write_all(b"\n").unwrap();
         let width =  String::from_utf8_lossy(&Command::new("tput").arg("cols").output().unwrap().stdout).trim().parse::<u16>().unwrap();
         let start_time = Instant::now();
         LoadingBar {
@@ -33,13 +33,13 @@ impl LoadingBar {
 
     // Updates time, bar, and count
     pub fn update(&mut self, num_done: u16) {
-        self.stdout.write((String::from(ESC) + "u").as_bytes()).unwrap();
-        self.stdout.write((String::from(ESC) + "1A").as_bytes()).unwrap();
+        self.stdout.write_all((String::from(ESC) + "u").as_bytes()).unwrap();
+        self.stdout.write_all((String::from(ESC) + "1A").as_bytes()).unwrap();
         let done = format!("{:>1$}", num_done, self.max.to_string().len());
         let count = format!(" {}/{} ", done, self.max);
         let time = format_duration(self.start_time.elapsed());
-        self.stdout.write(time.as_bytes()).unwrap();
-        self.stdout.write(b"[").unwrap();
+        self.stdout.write_all(time.as_bytes()).unwrap();
+        self.stdout.write_all(b"[").unwrap();
         let reserved_len = (count.len() + time.len()) as u16 + 2;
         let percent_done = num_done as f64 / self.max as f64;
         let num_done = ((self.width - reserved_len) as f64 * percent_done).round() as usize;
@@ -47,10 +47,10 @@ impl LoadingBar {
         let bar = format!("{}{}",
                           make_color(" ".repeat(num_done), 104),
                           make_color(" ".repeat(num_todo), 107));
-        self.stdout.write(bar.as_bytes()).unwrap();
-        self.stdout.write(b"]").unwrap();
-        self.stdout.write(count.as_bytes()).unwrap();
-        self.stdout.write(b"\n").unwrap();
+        self.stdout.write_all(bar.as_bytes()).unwrap();
+        self.stdout.write_all(b"]").unwrap();
+        self.stdout.write_all(count.as_bytes()).unwrap();
+        self.stdout.write_all(b"\n").unwrap();
     }
 
     pub fn flush(&mut self) {
@@ -62,8 +62,8 @@ impl LoadingBar {
         let time_str = format!("Took {} seconds", self.start_time.elapsed().as_secs_f64());
         let finish_str = format!("{:^1$}", time_str, self.width as usize);
         self.update(self.max);
-        self.stdout.write(finish_str.as_bytes()).unwrap();
-        self.stdout.write(b"\n").unwrap();
+        self.stdout.write_all(finish_str.as_bytes()).unwrap();
+        self.stdout.write_all(b"\n").unwrap();
     }
 }
 
