@@ -1,27 +1,29 @@
 use std::io::BufWriter;
 use std::fs::File;
 use crate::color::Color;
+use rayon::prelude::*;
 
-pub fn fn_to_png<F>(width: u32, height: u32, file: File, mut func: F) where F: FnMut(u32, u32) -> Color {
-    let mut data = Vec::with_capacity((width * height * 6) as usize);
-    for j in (1..=height).rev() {
-        for i in 0..width {
-            write_pixel(&mut data, func(i, j));
-        }
-    }
+pub fn fn_to_png(width: u32, height: u32, file: File, func: impl Fn(u32, u32) -> Color + Sync + Send) {
+    let mut data = vec![0; (width * height * 6) as usize];
+    data.par_chunks_exact_mut(6).enumerate().for_each(|(index, pixel)| {
+        let i = (index as u32) % width;
+        let j = height - ((index as u32) / width);
+        write_pixel(pixel, func(i, j));
+    });
     write_to_file(data, file, width, height);
 }
 
-pub fn write_pixel(buffer: &mut Vec<u8>, pixel: Color) {
+pub fn write_pixel(buffer: &mut [u8], pixel: Color) {
     let red = (pixel.r.sqrt().clamp(0.0, 0.999) * 65535.0) as u16;
     let green = (pixel.g.sqrt().clamp(0.0, 0.999) * 65535.0) as u16;
     let blue = (pixel.b.sqrt().clamp(0.0, 0.999) * 65535.0) as u16;
-    let to_write = [
+    let mut to_write = [
         (red >> 8) as u8, red as u8, 
         (green >> 8) as u8, green as u8, 
         (blue >> 8) as u8, blue as u8, 
     ];
-    buffer.extend_from_slice(&to_write);
+
+    buffer.copy_from_slice(&mut to_write);
 }
 
 fn write_to_file(data: Vec<u8>, file: File, width: u32, height: u32) {

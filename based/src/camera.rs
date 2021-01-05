@@ -5,7 +5,7 @@ use rand::distributions::Uniform;
 use rand::Rng;
 
 pub trait Camera {
-    fn make_ray(&self, u: f32, v: f32) -> Ray;
+    fn make_ray(&self, u: f64, v: f64) -> Ray;
 }
 
 pub struct SimpleCamera {
@@ -15,11 +15,11 @@ pub struct SimpleCamera {
     vertical: Vec3,
     u: Vec3,
     v: Vec3,
-    lens_radius: f32,
+    lens_radius: f64,
 }
 
 impl SimpleCamera {
-    pub fn new(lookfrom: Vec3, lookat: Vec3, vup: Vec3, vfov: f32, aspect_ratio: f32, aperture: f32, focus_dist: f32) -> SimpleCamera {
+    pub fn new(lookfrom: Vec3, lookat: Vec3, vup: Vec3, vfov: f64, aspect_ratio: f64, aperture: f64, focus_dist: f64) -> SimpleCamera {
         let theta = vfov.to_radians();
         let h = (theta / 2.0).tan();
         let viewport_height = 2.0 * h;
@@ -46,7 +46,7 @@ impl SimpleCamera {
 }
 
 impl Camera for SimpleCamera {
-    fn make_ray(&self, s: f32, t: f32) -> Ray {
+    fn make_ray(&self, s: f64, t: f64) -> Ray {
 
         let range = Uniform::new_inclusive(-1.0, 1.0);
         let mut rd = [with_rng(|r| Rng::sample(r, range)), with_rng(|r| Rng::sample(r, range))];
