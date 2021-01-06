@@ -48,15 +48,13 @@ impl<W: Hittable + Sync, C: Camera + Sync> Renderer<W, C> {
         let mut loadingbar = Mutex::new(LoadingBar::new(image_height, self.image_width).unwrap());
 
         fn_to_png(self.image_width, image_height, file, |i, j| {
-            let mut color = Color::new(0.0, 0.0, 0.0);
             loadingbar.lock().unwrap().advance().unwrap();
-            for _ in 0..=self.num_samples {
+            (0..(self.num_samples + 1)).map(|_| {
                 let u = (i as f64 + with_rng(rand::Rng::gen::<f64>)) / (self.image_width - 1) as f64;
                 let v = (j as f64 + with_rng(rand::Rng::gen::<f64>)) / (image_height - 1) as f64;
                 let r = self.camera.make_ray(u, v);
-                color += ray_color(r, &self.world, self.max_depth);
-            }
-            color / self.num_samples as f64
+                ray_color(r, &self.world, self.max_depth)
+            }).sum::<Color>() / self.num_samples as f64
         });
         loadingbar.get_mut().unwrap().finish().unwrap();
     }

@@ -25,6 +25,7 @@ dependencies = [
  "png",
  "rand",
  "rand_xoshiro",
+ "rayon",
  "xenon",
 ]
 

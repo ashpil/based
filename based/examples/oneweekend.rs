@@ -8,7 +8,7 @@ use glitz::vec::Vec3;
 use rand::Rng;
 
 fn random_scene() -> HittableList {
-    let ground_mat = Lambertian::new(Color::new(0.3, 0.9, 0.3));
+    let ground_mat = Lambertian::new(Color::new(0.5, 0.5, 0.5));
     let mut world = HittableList::new();
 
     world.push(Box::new(Sphere::new(Vec3::new(0.0, -1000.0, 0.0), 1000.0, ground_mat)));

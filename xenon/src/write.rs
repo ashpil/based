@@ -1,11 +1,17 @@
 use std::io::BufWriter;
 use std::fs::File;
 use crate::color::Color;
+
+#[cfg(feature = "rayon")]
 use rayon::prelude::*;
 
 pub fn fn_to_png(width: u32, height: u32, file: File, func: impl Fn(u32, u32) -> Color + Sync + Send) {
     let mut data = vec![0; (width * height * 6) as usize];
-    data.par_chunks_exact_mut(6).enumerate().for_each(|(index, pixel)| {
+    #[cfg(feature = "rayon")]
+    let iter = data.par_chunks_exact_mut(6);
+    #[cfg(not(feature = "rayon"))]
+    let iter = data.chunks_exact_mut(6);
+    iter.enumerate().for_each(|(index, pixel)| {
         let i = (index as u32) % width;
         let j = height - ((index as u32) / width);
         write_pixel(pixel, func(i, j));

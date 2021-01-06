@@ -1,6 +1,7 @@
 use std::ops::{Add, AddAssign, Mul, Sub, Div};
+use std::iter::Sum;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Default)]
 pub struct Color {
     pub r: f64,
     pub g: f64,
@@ -31,6 +32,12 @@ impl Color {
         buffer[3] = green as u8;
         buffer[4] = (blue >> 8) as u8;
         buffer[5] = blue as u8;
+    }
+}
+
+impl Sum for Color {
+    fn sum<I: Iterator<Item=Self>>(iter: I) -> Self {
+        iter.fold(Self::default(), Add::add)
     }
 }
 
