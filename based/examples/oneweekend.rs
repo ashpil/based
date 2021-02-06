@@ -49,8 +49,8 @@ fn random_scene() -> HittableList {
 }
 fn main() {
     let aspect_ratio = 3.0 / 2.0;
-    let width = 800;
-    let num_samples = 500;
+    let width = 1200;
+    let num_samples = 10;
 
     let world = random_scene();
     let lookfrom = Vec3::new(13.0, 2.0, 3.0);

@@ -7,10 +7,12 @@ use std::fs::File;
 use xenon::write::fn_to_png;
 use antsy::LoadingBar;
 use std::sync::Mutex;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 pub struct Renderer<W: Hittable + Sync, C: Camera + Sync> {
     world: W,
     camera: C,
+    num_rays: AtomicUsize,
     image_width: u32,
     aspect_ratio: f64,
     max_depth: u16,
@@ -22,6 +24,7 @@ impl<W: Hittable + Sync, C: Camera + Sync> Renderer<W, C> {
         Renderer {
             world,
             camera,
+            num_rays: AtomicUsize::new(0),
             image_width: 800,
             aspect_ratio: 16.0 / 9.0,
             max_depth: 50,
@@ -53,26 +56,32 @@ impl<W: Hittable + Sync, C: Camera + Sync> Renderer<W, C> {
                 let u = (i as f64 + with_rng(rand::Rng::gen::<f64>)) / (self.image_width - 1) as f64;
                 let v = (j as f64 + with_rng(rand::Rng::gen::<f64>)) / (image_height - 1) as f64;
                 let r = self.camera.make_ray(u, v);
-                ray_color(r, &self.world, self.max_depth)
+                self.ray_color(r, &self.world, self.max_depth)
             }).sum::<Color>() / self.num_samples as f64
         });
-        loadingbar.get_mut().unwrap().finish().unwrap();
-    }
-}
+        loadingbar.get_mut().unwrap().advance().unwrap();
+        let elapsed = loadingbar.into_inner().unwrap().get_elapsed().as_secs_f64();
+        let num_rays = self.num_rays.into_inner();
+        let time_str = format!("Took {:.4} seconds, shot {} rays, {:.4} mrays/s", elapsed, num_rays, num_rays as f64 / elapsed / 1_000_000.0);
+        println!("{}", time_str);
 
-fn ray_color(r: Ray, to_hit: &impl Hittable, depth: u16) -> Color {
-    if depth == 0 {
-        Color::new(0.0, 0.0, 0.0)
-    } else if let Some(hit) = to_hit.intersect(&r, 0.00001, f64::INFINITY) {
-        if let Some((scattered_ray, atten)) = hit.mat.scatter(&hit, r) {
-            atten * ray_color(scattered_ray, to_hit, depth - 1)
-        } else {
+    }
+
+    fn ray_color(&self, r: Ray, to_hit: &impl Hittable, depth: u16) -> Color {
+        self.num_rays.fetch_add(1, Ordering::Relaxed);
+        if depth == 0 {
             Color::new(0.0, 0.0, 0.0)
+        } else if let Some(hit) = to_hit.intersect(&r, 0.00001, f64::INFINITY) {
+            if let Some((scattered_ray, atten)) = hit.mat.scatter(&hit, r) {
+                atten * self.ray_color(scattered_ray, to_hit, depth - 1)
+            } else {
+                Color::new(0.0, 0.0, 0.0)
+            }
+        } else {
+            let unit_dir = r.d.unit_vec();
+            let t = 0.5 * (unit_dir.y + 1.0);
+            (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0)
         }
-    } else {
-        let unit_dir = r.d.unit_vec();
-        let t = 0.5 * (unit_dir.y + 1.0);
-        (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0)
     }
 }
 

@@ -76,9 +76,15 @@ impl<M: Material> Hittable for Sphere<M> {
 pub type HittableList = Vec<Box<dyn Hittable + Sync>>;
 impl Hittable for HittableList {
     fn intersect(&self, r: &Ray, tmin: f64, tmax: f64) -> Option<Hit> {
-        self.iter().fold(None, |acc, curr| 
-            curr.intersect(r, tmin, acc.as_ref().map_or(tmax, |x| x.t)).or(acc)
-        )
+        let mut result = None;
+        let mut closest_so_far = tmax;
+        for obj in self {
+            if let Some(ray_hit) = obj.intersect(r, tmin, closest_so_far) {
+                closest_so_far = ray_hit.t;
+                result = Some(ray_hit);
+            }
+        }
+        result
     }
 }
 

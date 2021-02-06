@@ -57,13 +57,8 @@ impl LoadingBar {
         self.stdout.flush()
     }
 
-    // Finishes bar; writes total time taken
-    pub fn finish(&mut self) -> io::Result<()> {
-        self.advance()?;
-        let time_str = format!("Took {} seconds", self.start_time.elapsed().as_secs_f64());
-        let finish_str = format!("{:^1$}", time_str, self.width as usize);
-        let mut handle = self.stdout.lock();
-        writeln!(handle, "{}", finish_str)
+    pub fn get_elapsed(&self) -> Duration {
+        self.start_time.elapsed()
     }
 }
 
