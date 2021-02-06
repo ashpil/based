@@ -8,7 +8,7 @@ const RESET: &str = "\x1b[0m";
 pub struct LoadingBar {
     max: u32,
     start_time: Instant,
-    width: u32,
+    width: usize,
     num_done: u32,
     advance_every: u32,
     stdout: Stdout,
@@ -20,7 +20,7 @@ impl LoadingBar {
         let mut handle = std.lock();
         writeln!(handle,)?;
         writeln!(handle, "{}", (String::from(ESC) + "s"))?;
-        let width =  String::from_utf8_lossy(&Command::new("tput").arg("cols").output().unwrap().stdout).trim().parse::<u32>().unwrap();
+        let width =  String::from_utf8_lossy(&Command::new("tput").arg("cols").output().unwrap().stdout).trim().parse::<usize>().unwrap();
         let start_time = Instant::now();
         Ok(LoadingBar {
             stdout: io::stdout(),
@@ -42,10 +42,10 @@ impl LoadingBar {
         write!(handle, "{}", time)?;
         let done = format!("{:>1$}", num_done, ((self.max as f64).log10() + 1.0).floor() as usize);
         let count = format!(" {}/{} ", done, self.max);
-        let reserved_len = (count.len() + time.len()) as u32 + 2;
+        let bar_len = self.width - (count.len() + time.len() + 2);
         let percent_done = num_done as f64 / self.max as f64;
-        let num_done = ((self.width - reserved_len) as f64 * percent_done).round() as usize;
-        let num_todo = ((self.width - reserved_len) as f64 * (1.0 - percent_done)).round() as usize;
+        let num_done = (bar_len as f64 * percent_done).round() as usize;
+        let num_todo = bar_len - num_done;
         write!(handle, "[{}{}]", 
                           make_color(" ".repeat(num_done), 104),
                           make_color(" ".repeat(num_todo), 107))?;
