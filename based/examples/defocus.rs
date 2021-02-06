@@ -1,7 +1,7 @@
 use based::renderer::Renderer;
 use based::camera::SimpleCamera;
-use based::material::{Metal, Dielectric, Lambertian};
-use based::hittable::{Sphere, HittableList};
+use based::material::Material::{Metal, Dielectric, Lambertian};
+use based::hittable::Sphere;
 use glitz::vec::Vec3;
 use xenon::color::Color;
 
@@ -10,16 +10,16 @@ fn main() {
     let image_width = 400;
 
     // World
-    let mat_ground = Lambertian::new(Color::new(0.8, 0.8, 0.0));
-    let mat_center = Lambertian::new(Color::new(0.1, 0.2, 0.5));
-    let mat_left = Dielectric::new(1.5);
-    let mat_right = Metal::new(Color::new(0.8, 0.6, 0.2), 0.0);
-    let mut world = HittableList::default();
-    world.push(Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0, mat_ground)));
-    world.push(Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, mat_center)));
-    world.push(Box::new(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), 0.5, mat_left.clone())));
-    world.push(Box::new(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), -0.45, mat_left.clone())));
-    world.push(Box::new(Sphere::new(Vec3::new(1.0, 0.0, -1.0), 0.5, mat_right)));
+    let mat_ground = Lambertian(Color::new(0.8, 0.8, 0.0));
+    let mat_center = Lambertian(Color::new(0.1, 0.2, 0.5));
+    let mat_left = Dielectric(1.5);
+    let mat_right = Metal(Color::new(0.8, 0.6, 0.2), 0.0);
+    let mut world = Vec::default();
+    world.push(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0, mat_ground));
+    world.push(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, mat_center));
+    world.push(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), 0.5, mat_left.clone()));
+    world.push(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), -0.45, mat_left.clone()));
+    world.push(Sphere::new(Vec3::new(1.0, 0.0, -1.0), 0.5, mat_right));
 
     // Camera
     let lookfrom = Vec3::new(3.0, 3.0, 2.0);

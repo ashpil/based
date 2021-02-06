@@ -4,6 +4,7 @@ use crate::ray::Ray;
 use crate::random::with_rng;
 use xenon::color::Color;
 
+#[derive(Clone)]
 pub enum Material {
     Lambertian(Color),
     Metal(Color, f64),

@@ -1,7 +1,7 @@
 use based::renderer::Renderer;
 use based::camera::SimpleCamera;
-use based::material::{Metal, Dielectric, Lambertian};
-use based::hittable::{Sphere, HittableList};
+use based::material::Material::{Metal, Dielectric, Lambertian};
+use based::hittable::Sphere;
 use glitz::vec::Vec3;
 use xenon::color::Color;
 
@@ -11,21 +11,21 @@ fn main() {
     let num_samples = 500;
 
     // World
-    let ground = Lambertian::new(Color::new(0.4, 0.6, 0.6));
-    let blue = Lambertian::new(Color::new(0.1, 0.2, 0.5));
-    let red = Lambertian::new(Color::new(0.9, 0.05, 0.05));
-    let gold = Metal::new(Color::new(0.8, 0.6, 0.2), 0.0);
-    let malachite = Metal::new(Color::new(0.2, 0.8, 0.2), 0.3);
-    let glass = Dielectric::new(2.8);
-    let glass2 = Dielectric::new(1.5);
-    let mut world = HittableList::default();
-    world.push(Box::new(Sphere::new(Vec3::new(0.0, -1000.75, 0.0), 1000.0, ground)));
-    world.push(Box::new(Sphere::new(Vec3::new(0.0, 0.0, 0.0), 0.75, blue)));
-    world.push(Box::new(Sphere::new(Vec3::new(0.0, 0.0, 1.6), 0.75, gold)));
-    world.push(Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.6), 0.75, glass)));
-    world.push(Box::new(Sphere::new(Vec3::new(0.0, 1.2, 0.8), 0.75, red)));
-    world.push(Box::new(Sphere::new(Vec3::new(0.0, 1.2, -0.8), 0.75, malachite)));
-    world.push(Box::new(Sphere::new(Vec3::new(0.0, 2.4, 0.0), 0.75, glass2)));
+    let ground = Lambertian(Color::new(0.4, 0.6, 0.6));
+    let blue = Lambertian(Color::new(0.1, 0.2, 0.5));
+    let red = Lambertian(Color::new(0.9, 0.05, 0.05));
+    let gold = Metal(Color::new(0.8, 0.6, 0.2), 0.0);
+    let malachite = Metal(Color::new(0.2, 0.8, 0.2), 0.3);
+    let glass = Dielectric(2.8);
+    let glass2 = Dielectric(1.5);
+    let mut world = Vec::default();
+    world.push(Sphere::new(Vec3::new(0.0, -1000.75, 0.0), 1000.0, ground));
+    world.push(Sphere::new(Vec3::new(0.0, 0.0, 0.0), 0.75, blue));
+    world.push(Sphere::new(Vec3::new(0.0, 0.0, 1.6), 0.75, gold));
+    world.push(Sphere::new(Vec3::new(0.0, 0.0, -1.6), 0.75, glass));
+    world.push(Sphere::new(Vec3::new(0.0, 1.2, 0.8), 0.75, red));
+    world.push(Sphere::new(Vec3::new(0.0, 1.2, -0.8), 0.75, malachite));
+    world.push(Sphere::new(Vec3::new(0.0, 2.4, 0.0), 0.75, glass2));
 
     // Camera
     let lookfrom = Vec3::new(17.0, 4.0, 3.0);
