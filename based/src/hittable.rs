@@ -51,16 +51,14 @@ impl<M: Material> Hittable for Sphere<M> {
         let c = oc.dot(&oc) - self.radius * self.radius;
 
         let discriminant = half_b * half_b - a * c;
-        if discriminant < 0.0 {
-            None
-        } else {
+        if discriminant > 0.0 {
             let sqrtd = discriminant.sqrt();
 
             // Find the nearest root that lies in the acceptable range.
             let mut root = (-half_b - sqrtd) / a;
-            if !(tmin..tmax).contains(&root) {
+            if root < tmin || tmax < root {
                 root = (-half_b + sqrtd) / a;
-                if !(tmin..tmax).contains(&root) {
+                if root < tmin || tmax < root {
                     return None;
                 }
             }
@@ -69,6 +67,8 @@ impl<M: Material> Hittable for Sphere<M> {
             let front_face = r.d.dot(&outward_normal) < 0.0;
             let normal = if front_face { outward_normal } else { -outward_normal };
             Some(Hit::new(point, normal, root, front_face, &self.mat))
+        } else {
+            None
         }
     }
 }
