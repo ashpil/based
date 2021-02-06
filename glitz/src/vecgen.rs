@@ -3,29 +3,21 @@ use rand::distributions::Standard;
 use rand::distributions::Uniform;
 use rand::prelude::Distribution;
 use rand::Rng;
+use std::iter::FromIterator;
 use rand_distr::StandardNormal;
 
-#[derive(Debug, PartialEq, Clone, Copy, Default)]
-pub struct Vec3 {
-    pub x: f64,
-    pub y: f64,
-    pub z: f64,
-}
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub struct VecN<const N: usize>([f64; N]);
 
-impl Vec3 {
-    #[inline]
-    pub fn new(x: f64, y: f64, z: f64) -> Self {
-        Self { x, y, z }
-    }
-
+impl<const N: usize> VecN<{ N }> {
     #[inline]
     pub fn dot(self, other: Self) -> f64 {
-        self.x * other.x + self.y * other.y + self.z * other.z
+        self.0.iter().zip(other.0.iter()).map(|(a, b)| a * b).sum()
     }
 
     #[inline]
     pub fn length(self) -> f64 {
-        (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
+        self.dot(self).sqrt()
     }
 
     #[inline]
@@ -34,21 +26,12 @@ impl Vec3 {
     }
 
     #[inline]
-    pub fn cross(self, other: Self) -> Self {
-        Self::new(
-            self.y*other.z - self.z*other.y,
-            self.z*other.x - self.x*other.z,
-            self.x*other.y - self.y*other.x,
-        )
-    }
-
-    #[inline]
     pub fn reflect(self, n: Self) -> Self {
         self - 2.0 * self.dot(n) * n
     }
 
     #[inline]
-    pub fn refract(self, n: Vec3, etai_over_etat: f64) -> Vec3 {
+    pub fn refract(self, n: Self, etai_over_etat: f64) -> Self {
         let cos_theta = ((-self).dot(n)).min(1.0);
         let r_out_perp = etai_over_etat * (self + cos_theta * n);
         let r_out_parallel = -((1.0 - r_out_perp.dot(r_out_perp)).abs().sqrt()) * n;
@@ -57,19 +40,18 @@ impl Vec3 {
 
     // Return true if the vector is close to zero in all dimensions.
     #[inline]
-    pub fn near_zero(&self) -> bool {
-        let e = 1e-8;
-        (self.x.abs() < e) && (self.y.abs() < e) && (self.z.abs() < e)
+    pub fn near_zero(self) -> bool {
+        self.0.iter().map(|x| x.abs()).all(|x| x < 1e-8)
     }
-
-    #[inline]
-    pub fn random_unit_vec(rng: &mut impl Rng) -> Self {
-        Vec3::new(rng.sample(StandardNormal), rng.sample(StandardNormal), rng.sample(StandardNormal)).unit_vec()
-    }
-
+ 
+     #[inline]
+     pub fn random_unit_vec(rng: &mut impl Rng) -> Self {
+        Self::from_iter(std::iter::from_fn(|| Some(rng.sample(StandardNormal))).take(N)).unit_vec()
+     }
+ 
     #[inline]
     pub fn random_in_unit_sphere(rng: &mut impl Rng) -> Self {
-        let mut p: Vec3 = rng.gen();
+        let mut p: Self = rng.gen();
         while p.dot(p) >= 1.0 {
             p = rng.gen();
         }
@@ -77,98 +59,114 @@ impl Vec3 {
     }
 }
 
-impl Distribution<Vec3> for Standard {
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Vec3 {
+pub type Vec3 = VecN<3>;
+
+impl Vec3 {
+    pub fn new(x: f64, y: f64, z: f64) -> Self {
+        Self([x, y, z])
+    }
+
+    pub fn x(self) -> f64 {
+        self.0[0]
+    }
+    pub fn y(self) -> f64 {
+        self.0[1]
+    }
+
+    pub fn z(self) -> f64 {
+        self.0[2]
+    }
+
+    #[inline]
+    pub fn cross(self, other: Self) -> Self {
+        Self::new(
+            self.y()*other.z() - self.z()*other.y(),
+            self.z()*other.x() - self.x()*other.z(),
+            self.x()*other.y() - self.y()*other.x(),
+        )
+    }
+
+}
+
+impl<const N: usize> Distribution<VecN<{ N }>> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> VecN<{ N }> {
         let between = Uniform::new_inclusive(-1.0, 1.0);
-        Vec3::new(between.sample(rng), between.sample(rng), between.sample(rng)) 
+        let mut result = [f64::default(); N];
+        for rref in result.iter_mut() {
+            *rref = between.sample(rng);
+        }
+        result.into()
     }
 }
 
-impl Add for Vec3 {
-    type Output = Vec3;
+impl<const N: usize> Add for VecN<{ N }> {
+    type Output = VecN<{ N }>;
 
     #[inline]
     fn add(self, other: Self) -> Self::Output {
-        Vec3 {
-            x: self.x + other.x,
-            y: self.y + other.y,
-            z: self.z + other.z,
-        }
+        Self::from_iter(self.0.iter().zip(other.0.iter()).map(|(a, b)| a + b))
     }
 }
 
-impl Sub for Vec3 {
-    type Output = Vec3;
+impl<const N: usize> Sub for VecN<{ N }> {
+    type Output = VecN<{ N }>;
 
     #[inline]
     fn sub(self, other: Self) -> Self::Output {
-        Vec3 {
-            x: self.x - other.x,
-            y: self.y - other.y,
-            z: self.z - other.z,
-        }
+        Self::from_iter(self.0.iter().zip(other.0.iter()).map(|(a, b)| a - b))
     }
 }
 
-impl Neg for Vec3 {
-    type Output = Vec3;
+impl<const N: usize> Neg for VecN<{ N }> {
+    type Output = VecN<{ N }>;
 
     #[inline]
     fn neg(self) -> Self::Output {
-        Vec3 {
-            x: -self.x,
-            y: -self.y,
-            z: -self.z,
-        }
+        Self::from_iter(self.0.iter().map(|a| -a))
     }
 }
 
-impl Mul<f64> for Vec3 {
-    type Output = Vec3;
+impl<const N: usize> Mul<f64> for VecN<{ N }> {
+    type Output = VecN<{ N }>;
 
     #[inline]
     fn mul(self, s: f64) -> Self::Output {
-        Vec3 {
-            x: self.x * s,
-            y: self.y * s,
-            z: self.z * s,
-        }
+        Self::from_iter(self.0.iter().map(|a| a * s))
     }
 }
 
-impl Mul<Vec3> for f64 {
-    type Output = Vec3;
+impl<const N: usize> Mul<VecN<{ N }>> for f64 {
+    type Output = VecN<{ N }>;
 
     #[inline]
-    fn mul(self, vec: Vec3) -> Self::Output {
-        Vec3 {
-            x: vec.x * self,
-            y: vec.y * self,
-            z: vec.z * self,
-        }
+    fn mul(self, vec: VecN<{ N }>) -> Self::Output {
+        Self::Output::from_iter(vec.0.iter().map(|a| a * self))
     }
 }
 
-impl Div<f64> for Vec3 {
-    type Output = Vec3;
+impl<const N: usize> Div<f64> for VecN<{ N }> {
+    type Output = VecN<{ N }>;
 
     #[inline]
     fn div(self, s: f64) -> Self::Output {
-        Vec3 {
-            x: self.x / s,
-            y: self.y / s,
-            z: self.z / s,
-        }
+        Self::from_iter(self.0.iter().map(|a| a / s))
     }
 }
 
-impl From<[f64; 3]> for Vec3 {
-    fn from(arr: [f64; 3]) -> Self {
-        Vec3 {
-            x: arr[0],
-            y: arr[1],
-            z: arr[2],
+impl<const N: usize> From<[f64; N]> for VecN<{ N }> {
+    fn from(arr: [f64; N]) -> Self {
+        Self(arr)
+    }
+}
+
+
+impl<const N: usize> FromIterator<f64> for VecN<{ N }> {
+    fn from_iter<I: IntoIterator<Item=f64>>(iter: I) -> Self {
+        let mut result = [f64::default(); N];
+        for (rref, val) in result.iter_mut().zip(iter) {
+            *rref = val;
         }
+        result.into()
     }
 }
 
