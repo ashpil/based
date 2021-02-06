@@ -1,4 +1,4 @@
-use crate::hittable::Hittable;
+use crate::hittable::{intersect_spheres, Sphere};
 use crate::camera::Camera;
 use xenon::color::Color;
 use crate::ray::Ray;
@@ -9,8 +9,8 @@ use antsy::LoadingBar;
 use std::sync::Mutex;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-pub struct Renderer<W: Hittable + Sync, C: Camera + Sync> {
-    world: W,
+pub struct Renderer<C: Camera + Sync> {
+    world: Vec<Sphere>,
     camera: C,
     num_rays: AtomicUsize,
     image_width: u32,
@@ -19,8 +19,8 @@ pub struct Renderer<W: Hittable + Sync, C: Camera + Sync> {
     num_samples: u16,
 }
 
-impl<W: Hittable + Sync, C: Camera + Sync> Renderer<W, C> {
-    pub fn new(world: W, camera: C) -> Self {
+impl<C: Camera + Sync> Renderer<C> {
+    pub fn new(world: Vec<Sphere>, camera: C) -> Self {
         Renderer {
             world,
             camera,
@@ -56,7 +56,7 @@ impl<W: Hittable + Sync, C: Camera + Sync> Renderer<W, C> {
                 let u = (i as f64 + with_rng(rand::Rng::gen::<f64>)) / (self.image_width - 1) as f64;
                 let v = (j as f64 + with_rng(rand::Rng::gen::<f64>)) / (image_height - 1) as f64;
                 let r = self.camera.make_ray(u, v);
-                self.ray_color(r, &self.world, self.max_depth)
+                self.ray_color(r, self.max_depth)
             }).sum::<Color>() / self.num_samples as f64
         });
         loadingbar.get_mut().unwrap().advance().unwrap();
@@ -67,13 +67,13 @@ impl<W: Hittable + Sync, C: Camera + Sync> Renderer<W, C> {
 
     }
 
-    fn ray_color(&self, r: Ray, to_hit: &impl Hittable, depth: u16) -> Color {
+    fn ray_color(&self, r: Ray, depth: u16) -> Color {
         self.num_rays.fetch_add(1, Ordering::Relaxed);
         if depth == 0 {
             Color::new(0.0, 0.0, 0.0)
-        } else if let Some(hit) = to_hit.intersect(&r, 0.00001, f64::INFINITY) {
-            if let Some((scattered_ray, atten)) = hit.mat.scatter(&hit, r) {
-                atten * self.ray_color(scattered_ray, to_hit, depth - 1)
+        } else if let Some(hit) = intersect_spheres(&self.world, &r, 0.00001, f64::INFINITY) {
+            if let Some((scattered_ray, atten)) = hit.mat.scatter(hit, r) {
+                atten * self.ray_color(scattered_ray, depth - 1)
             } else {
                 Color::new(0.0, 0.0, 0.0)
             }

@@ -7,11 +7,11 @@ pub struct Hit<'a> {
     pub normal: Vec3,
     pub t: f64,
     pub front_face: bool,
-    pub mat: &'a dyn Material,
+    pub mat: &'a Material,
 }
 
 impl<'a> Hit<'a> {
-    pub fn new(point: Vec3, normal: Vec3, t: f64, front_face: bool, mat: &'a dyn Material) -> Hit<'a> {
+    pub fn new(point: Vec3, normal: Vec3, t: f64, front_face: bool, mat: &'a Material) -> Hit<'a> {
         Hit {
             point, 
             normal,
@@ -22,29 +22,22 @@ impl<'a> Hit<'a> {
     }
 }
 
-pub trait Hittable {
-    fn intersect(&self, r: &Ray, tmin: f64, tmax: f64) -> Option<Hit>;
-}
-
-pub struct Sphere<M: Material> {
+pub struct Sphere {
     center: Vec3,
     radius: f64,
-    mat: M,
+    mat: Material,
 }
 
-impl<M: Material> Sphere<M> {
-    pub fn new(center: Vec3, radius: f64, mat: M) -> Sphere<M> {
+impl Sphere {
+    pub fn new(center: Vec3, radius: f64, mat: Material) -> Sphere {
         Sphere {
             center,
             radius,
             mat,
         }
     }
-}
 
-impl<M: Material> Hittable for Sphere<M> {
-
-    fn intersect(&self, r: &Ray, tmin: f64, tmax: f64) -> Option<Hit> {
+    pub fn intersect(&self, r: &Ray, tmin: f64, tmax: f64) -> Option<Hit> {
         let oc = r.o - self.center;
         let a = r.d.dot(&r.d);
         let half_b = oc.dot(&r.d);
@@ -73,18 +66,14 @@ impl<M: Material> Hittable for Sphere<M> {
     }
 }
 
-pub type HittableList = Vec<Box<dyn Hittable + Sync>>;
-impl Hittable for HittableList {
-    fn intersect(&self, r: &Ray, tmin: f64, tmax: f64) -> Option<Hit> {
-        let mut result = None;
-        let mut closest_so_far = tmax;
-        for obj in self {
-            if let Some(ray_hit) = obj.intersect(r, tmin, closest_so_far) {
-                closest_so_far = ray_hit.t;
-                result = Some(ray_hit);
-            }
+pub fn intersect_spheres<'a>(list: &'a [Sphere], r: &Ray, tmin: f64, tmax: f64) -> Option<Hit<'a>> {
+    let mut result = None;
+    let mut closest_so_far = tmax;
+    for obj in list {
+        if let Some(ray_hit) = obj.intersect(r, tmin, closest_so_far) {
+            closest_so_far = ray_hit.t;
+            result = Some(ray_hit);
         }
-        result
     }
+    result
 }
-
